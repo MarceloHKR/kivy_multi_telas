@@ -67,7 +67,7 @@ class TelaLogin(Screen):
         usuario = self.ids.txt_usuario.text
         senha = self.ids.txt_senha.text
                
-        url = 'https://2181-168-232-136-83.ngrok-free.app/restaurante/autenticar'
+        url = 'https://9717-168-232-136-83.ngrok-free.app/restaurante/autenticar'
         #url = 'http://localhost:5500/restaurante/autenticar'
         dados = {'usuario': usuario, 'senha': senha}
         resposta = requests.post(url, json=dados)
@@ -82,7 +82,36 @@ class TelaPrincipal(Screen):
     pass
 
 class TelaGarcom(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        import sqlite3
+        #consulta ao vanco de dados para obter o cardapio
+        conn = sqlite3.connect('cardapio.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM  cardapio')
+        self.cardapio = cursor.fetchall()
+        conn.close()
+        self.cardapio_itens = [item[1] for item in self.cardapio if item[5] == 'Bar']
+
+
+    def atualiza_lista_cardapio(self):
+        if self.ids.radio_bar.active:
+            self.ids.itens_cardapio.values = [item[1] for item in self.cardapio if item[5] == 'Bar']
+        elif self.ids.radio_cozinha.active:
+            self.ids.itens_cardapio.values = [item[1] for item in self.cardapio if item[5] == 'Cozinha']
+
+        self.ids.itens_cardapio.text = "Selecione"
+
+    def decrementa_qtd_item(self):
+        if int(self.ids.qtd_item.text) > 0:
+            self.ids.qtd_item.text = str(int(self.ids.qtd_item.text) - 1)
+
+    def incrementa_qtd_item(self):
+        self.ids.qtd_item.text = str(int(self.ids.qtd_item.text) + 1)
+
+
+
+
 
 class GerenciadorTelas(ScreenManager):
     pass
