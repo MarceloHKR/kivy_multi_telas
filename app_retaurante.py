@@ -92,6 +92,13 @@ class TelaGarcom(Screen):
         self.cardapio = cursor.fetchall()
         conn.close()
         self.cardapio_itens = [item[1] for item in self.cardapio if item[5] == 'Bar']
+        #####
+        self.pedido_mesa = {
+            "mesa": "",
+            "cozinha": [],
+            "bar": [],
+            "status": "pendente"
+        }
 
 
     def atualiza_lista_cardapio(self):
@@ -109,7 +116,29 @@ class TelaGarcom(Screen):
     def incrementa_qtd_item(self):
         self.ids.qtd_item.text = str(int(self.ids.qtd_item.text) + 1)
 
+    def inclui_pedido_na_lista(self):
+        if self.ids.mesa_id.text == "Mesa":
+            return
+        qtd = self.ids.qtd_item.text
+        pedido = self.ids.itens_cardapio.text
+        if qtd == '0' or pedido == "Selecione":
+            return
+        
+        self.ids.qtd_item.text = "0"
+        self.ids.itens_cardapio.text = "Selecione"
 
+        self.ids.itens_pedido.text += f"\n{qtd} - {pedido}"
+
+        self.pedido_mesa['mesa'] = self.ids.mesa_id.text
+
+        if self.ids.radio_bar.active:
+            self.pedido_mesa['bar'].append(f"{qtd} - {pedido}")
+        elif self.ids.radio_cozinha.active:
+            self.pedido_mesa['cozinha'].append(f"{qtd} - {pedido}")
+
+    def enviar_pedido(self):
+        url = 'http://cf9d-168-232-136-83.ngrok-free.app/restaurante/criar_pedido'
+        resposta = requests.post(url, json=self.pedido_mesa)
 
 
 
